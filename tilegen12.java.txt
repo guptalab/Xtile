@@ -1,0 +1,1702 @@
+/*
+ * @(#)Tilegen.java 1.0 08/08/18
+ *
+ * 
+ * 
+ *
+ * 
+ * 
+ * 
+ *
+ */
+
+import java.awt.*;
+import java.applet.*;
+import java.net.*;
+import java.awt.event.*;
+import java.io.FilePermission;
+
+
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+
+
+import java.security.AccessController;
+import java.lang.*;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Formatter;
+import java.util.FormatterClosedException;
+import java.lang.String;
+
+public class tilegen12 extends Applet implements ActionListener {
+	
+	 Image tile_gif,qug_gif;
+	 URL base;
+	 MediaTracker mt;
+	 Button okButton; 
+	 Button confirmButton; 
+	 Button frameButton; 
+	 TextField north_inputs,east_inputs,south_inputs,west_inputs,frameip1,frameip2;
+	 TextArea compact3; 
+	 int cflag,frflag;
+	 String newline;
+	 public static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
+	
+	 
+	
+	public void init() {
+		
+		setLayout(null); 
+		okButton = new Button("Submit Inputs"); 
+		frameButton = new Button("Submit frame glues");
+		confirmButton = new Button("Click to confirm"); 
+		north_inputs = new TextField("Type north outputs here",40); 
+		east_inputs = new TextField("Type east inputs here",40); 
+		south_inputs = new TextField("Type south inputs here",40); 
+		west_inputs = new TextField("Type west outputs here",40);
+		frameip1 = new TextField("",40);
+		frameip2 = new TextField("",40); 
+		compact3 = new TextArea(10,10);
+		compact3.setEditable(false);
+		
+	
+		cflag=0;
+		frflag=0;
+		north_inputs.setBounds(130,40,200,30); 
+		add(north_inputs); 
+		
+		east_inputs.setBounds(340,150,130,30); 
+		add(east_inputs); 
+		
+		south_inputs.setBounds(130,250,200,30); 
+		add(south_inputs); 
+		
+		west_inputs.setBounds(10,150,130,30); 
+		add(west_inputs); 
+		
+		frameip1.setBounds(680,22,50,30);
+		add(frameip1);
+		
+		frameip2.setBounds(680,62,50,30);
+		add(frameip2);
+		
+		compact3.setBounds(500,150,400,300);
+		add(compact3);
+		
+		okButton.setBounds(130,290,100,30);
+		add(okButton); 
+		okButton.addActionListener(this); 
+		
+		confirmButton.setBounds(10,420,120,30);
+		add(confirmButton); 
+		confirmButton.addActionListener(this); 
+		
+		frameButton.setBounds(500,110,200,30);
+		add(frameButton); 
+		frameButton.addActionListener(this); 
+		
+		newline = System.getProperty("line.separator");
+		
+		mt = new MediaTracker(this);
+		
+		try {
+   
+               base = getDocumentBase();
+         }
+         catch (Exception e) {}
+         tile_gif = getImage(base,"tile_sample.gif");
+  		 qug_gif = getImage(base, "quick_user_guide.gif");
+         try {
+               mt.waitForAll();
+          }
+          catch (InterruptedException  e) {} 
+	}
+
+	public void paint(Graphics g) {
+	
+		g.drawString("Welcome to XTile ver 1.2 for 3-way Compact error Correction", 10, 20 );
+		g.drawString("\n Please enter inputs for the four sides of the computational tile design.", 10, 35 );
+		//g.drawString("\n enter input for frame.", 500, 35 );
+		g.drawString("\n enter input for vertical frame", 500, 50 );
+		g.drawString("\n enter input for horizontal frame", 500, 90 );
+
+		 
+		g.drawString("North inputs :"+north_inputs.getText(),10,340); 
+		g.drawString("East inputs :"+east_inputs.getText(),10,360); 
+		g.drawString("South inputs :"+south_inputs.getText(),10,380); 
+		g.drawString("West inputs :"+west_inputs.getText(),10,400); 
+		
+		int[] xcd = new int[3];
+		int[] ycd = new int[3];
+		xcd[0]=150;xcd[1]=235;xcd[2]=150;
+		ycd[0]=80;ycd[1]=160;ycd[2]=240;
+		g.setColor( Color.red );
+		g.drawPolygon(xcd, ycd, 3);
+		g.fillPolygon(xcd, ycd, 3);
+		
+		xcd[0]=150;xcd[1]=235;xcd[2]=320;
+		ycd[0]=80;ycd[1]=160;ycd[2]=80;
+		g.setColor( Color.blue );
+		g.drawPolygon(xcd, ycd, 3);
+		g.fillPolygon(xcd, ycd, 3);
+		
+		xcd[0]=320;xcd[1]=235;xcd[2]=320;
+		ycd[0]=80;ycd[1]=160;ycd[2]=240;
+		g.setColor( Color.yellow );
+		g.drawPolygon(xcd, ycd, 3);
+		g.fillPolygon(xcd, ycd, 3);
+		
+		xcd[0]=150;xcd[1]=235;xcd[2]=320;
+		ycd[0]=240;ycd[1]=160;ycd[2]=240;
+		g.setColor( Color.green );
+		g.drawPolygon(xcd, ycd, 3);
+		g.fillPolygon(xcd, ycd, 3);
+		
+		g.setColor( Color.black );
+		g.drawString("\n W", 192, 160 );
+		g.drawString("\n E", 276, 160 );
+		g.drawString("\n N", 235, 120 );
+		g.drawString("\n S", 234, 200 );
+		
+			
+	}
+	
+	     public void actionPerformed(ActionEvent evt) 
+         {
+         	frflag=0;
+         	if(evt.getSource() == frameButton)
+              {
+              	frflag=1;
+              }
+         
+              if (evt.getSource() == okButton){ repaint();okButton.setLabel("Submitted");cflag=0;frflag=1;}
+              else if ((evt.getSource() == confirmButton && cflag==0) || frflag==1) 
+          	{
+		
+		
+			String[] in = new String[100];
+			
+            int i=0;
+			for(i=0;i<100;i++) {in[i]="";}
+            int xi=0;
+            int l1,l2,l3,l4;
+            l1=l2=l3=l4=0;
+            
+            char[] ni = north_inputs.getText().toCharArray();
+            int nil = north_inputs.getText().length();
+            if(north_inputs.getText()!="\n")
+            {
+            l1++;
+            for(i=0;i<nil;i++)
+            {
+            	if(ni[i]==',') { xi++;l1++;}
+            	else 
+            	{
+ 					String ch1 = null;
+ 					ch1 = "" + ni[i];           	
+            		in[xi]=in[xi].concat(ch1);
+            	}	
+        	}
+        	
+        	
+        	}
+        	xi++;
+        	
+        	
+        	char[] ei = east_inputs.getText().toCharArray();
+            int eil = east_inputs.getText().length();
+            if(east_inputs.getText()!="\n")
+            {
+            l2++;
+            for(i=0;i<eil;i++)
+            {
+            	if(ei[i]==',')  {xi++;l2++;}
+            	else 
+            	{
+            		String ch2 = null;	
+            		ch2 = "" + ei[i];
+            		in[xi]=in[xi].concat(ch2);
+            	}	
+        	}
+        	
+        	}
+        	xi++;
+        	
+        	
+        	char[] si = south_inputs.getText().toCharArray();
+            int sil = south_inputs.getText().length();
+            if(south_inputs.getText()!="\n")
+            {
+            l3++;
+            for(i=0;i<sil;i++)
+            {
+            	if(si[i]==',')  {xi++;l3++;}
+            	else
+            	{
+            		String ch3 = null;
+            		ch3 = "" +si[i];            		
+            		in[xi]=in[xi].concat(ch3);
+            	}
+        	}
+        	
+        	}
+        	xi++;
+        	
+        	
+        	
+        	char[] wi = west_inputs.getText().toCharArray();
+            int wil = west_inputs.getText().length();
+            if(west_inputs.getText()!="\n")
+            {
+            l4++;
+            for(i=0;i<wil;i++)
+            {
+            	if(wi[i]==',')  {xi++;l4++;}
+            	else
+            	{
+            		String ch4;	
+            		ch4 = "" +wi[i];
+            		in[xi]=in[xi].concat(ch4);
+            	}
+        	}
+        	
+        	}
+        	xi++;
+            
+            in[xi]="\n";
+		
+
+            int size_north,size_south,size_east,size_west;
+			int n;
+			n=0;            
+ //           System.out.printf("welcome to tilegen !!\n");
+            
+             
+            try
+	 		{
+	 			//accepting inputs for side North
+//            System.out.printf("How many inputs for side NORTH ? please enter them too");
+            size_north = l1;
+            String[] north_input =new String[size_north];
+            for(i=0;i<size_north;i++)
+            {
+              north_input[i] = in[i];
+          	  	
+            
+ 			}
+ 			
+ 			//accepting inputs for side East
+           //System.out.printf("How many inputs for side EAST ? please enter them too");
+            size_east = l2;
+            String[] east_input =new String[size_east];
+            for(i=0;i<size_east;i++)
+            {
+              east_input[i] = in[size_north+i];
+            
+            
+ 			}
+ 			
+ 			//accepting inputs for side  South
+    //        System.out.printf("How many inputs for side SOUTH ? please enter them too");
+            size_south = l3;
+            String[] south_input =new String[size_south];
+            for(i=0;i<size_south;i++)
+            {
+              south_input[i] = in[size_north+size_east+i];
+              
+ 			}
+ 			
+ 			//accepting inputs for side West
+       //     System.out.printf("How many inputs for side WEST ? please enter them too");
+            size_west = l4;
+            String[] west_input =new String[size_west]; 
+            for(i=0;i<size_west;i++)
+            {
+              west_input[i] = in[size_north+size_east+size_south+i];
+     		  
+           	}	
+	 			
+				//output = new Formatter("final.tiles");
+				
+				Scanner input = new Scanner(System.in);
+				Scanner input1 = new Scanner(System.in);
+				Scanner input2 = new Scanner(System.in);
+				int k=0, l=0, j=0;
+				i=0;
+	
+	            char north[][] = new char[size_north][100];
+	            
+	            
+	                                    
+	            for(i = 0; i < size_north; i++)
+	            {
+	            	north[i] = north_input[i].toCharArray();
+	            }
+	
+	            char east[][] = new char[size_east][1000];
+	            
+	            for(i = 0; i < size_east; i++)
+	            {
+	            	east[i] = east_input[i].toCharArray();
+	            }
+	            
+	            char south[][] = new char[size_south][1000];
+	            
+	            for(i = 0; i < size_south; i++)
+	            {
+	            	south[i] = south_input[i].toCharArray();
+	            }
+	            
+	            char west[][] = new char[size_west][1000];
+	            
+	            for(i = 0; i < size_west; i++)
+	            {
+	            	west[i] = west_input[i].toCharArray();
+	            } 
+	            
+	           
+	            char x;
+	            char alpha[] = new char[26];//for assigning alphabets to our variable
+	            for(x='a',i=0;x <= 'z'; x++,i++)
+	            {	
+	            	alpha[i] = x;
+	            
+	            }
+	            
+	           char a[] = new char[size_north];
+	           char b[] = new char[size_north];
+	           char c[] = new char[size_east];
+	           char d[] = new char[size_east];
+	           
+	           for(i=0,j=0;j < size_north; j++,i++)
+	           {
+	           		a[j] = alpha[i];
+	           		
+	           }
+	           
+	           for(j=0; j< size_north; j++,i++)
+	           {
+	           		b[j] = alpha[i];
+	           }
+	           
+	           for(j=0; j < size_east; j++,i++)
+	           {
+	           		c[j] = alpha[i];
+	           }
+	           
+	           for(j=0; j < size_east; j++,i++)
+	           {
+	           		d[j] = alpha[i];
+	           }
+	           
+	           char dOP1b[][] = new char[size_north][100];
+	           char dOP2b[][] = new char[size_east][100];
+	           char dOP2bOP1a[][] = new char[size_north][100];
+	           char cOP1dOP1b[][] = new char[size_north][100];
+	           char cOP2dOP1b[][] = new char[size_east][100];
+	           
+	           for(k =0; k< size_north; k++)  //scanning the north side for computing dOP1b
+	           {
+	           	for(l=0; l< north[k].length; l++)
+	           	{
+		          	if(north[k][l] == '+' || north[k][l] == '^' || north[k][l] == '~' || north[k][l] == '.' || north[k][l] == '(' || north[k][l] == ')')
+		          		dOP1b[k][l] = north[k][l];
+		          	
+		          	else{
+			          	  for(i=0; i< size_south; i++)
+				           {	
+				           	 for(j=0; j < south[i].length; j++)        //j++ is not needed i think
+				           		{
+				           			if(south[i][j] == north[k][l])
+				           			{
+				           				dOP1b[k][l] = b[i];
+				           				//System.out.printf("%d %d\n",k,l);
+				           			}
+				           		}
+				           }
+				           
+				           for(i=0; i< size_east; i++)
+				           {	
+				           	 for(j=0; j < east[i].length; j++)
+				           		{
+				           			if(east[i][j] == north[k][l])
+				           			{
+				           				dOP1b[k][l] = d[i];
+				           					
+				           			}
+				           		}
+				           }
+				         }
+			        
+		         }
+		   	  }
+	           
+	           
+	           
+	          for(k=0; k < size_west; k++)  //scanning west for computing dOP2b 
+		   	  {
+		   	  	for(l=0; l < west[k].length; l++)
+		   	  	{
+		   	  		if(west[k][l] == '+' || west[k][l] == '^' || west[k][l] == '~' || west[k][l] == '.' || west[k][l] == '(' || west[k][l] == ')')
+		          		dOP2b[k][l] = west[k][l];
+		          		
+		          	else{	
+			   	  		for(i=0; i< size_south; i++)
+				           {	
+				           	 for(j=0; j < south[i].length; j++)
+				           		{
+				           			if(south[i][j] == west[k][l])
+				           				dOP2b[k][l] = b[i];
+				           		}
+				           }
+				           
+				           for(i=0; i< size_east; i++)
+				           {	
+				           	 for(j=0; j < east[i].length; j++)
+				           		{
+				           			if(east[i][j] == west[k][l])
+				           				dOP2b[k][l] = d[i];
+				           		}
+				           }
+			        	}
+	         	 }
+	          }
+	           
+	           
+	           
+	           //for dOP2bOP1a, cOP1dOP1b, cOP2dOP1b
+	          
+	          	
+	          
+	          char tempo_dOP1b[][] = new char[size_north][100];
+	          char tempo_dOP2b[][] = new char[size_east][100];
+	          
+	          
+	          for(i=0;i<size_east;i++)//for adding the brackets around dOP2b
+	          {
+	          	tempo_dOP2b[i][0] = '(';
+	          	for(j=0;Character.isLetterOrDigit(dOP2b[i][j])==true || dOP2b[i][j]=='+'||dOP2b[i][j]=='.'||dOP2b[i][j]=='~'||dOP2b[i][j]=='^'||dOP2b[i][j]=='('||dOP2b[i][j]==')';j++)
+	          	{
+	          		tempo_dOP2b[i][j+1] = dOP2b[i][j];
+	          	}
+	          	if(j==1)
+	          	{
+	          		tempo_dOP2b[i][0] = dOP2b[i][0];
+	          		tempo_dOP2b[i][1] = '?';     //character added which wont suffice many conditions for various loops afterwards
+	          	}
+	          	else
+	          		tempo_dOP2b[i][j+1] = ')';
+	          	
+	          }
+	          
+	          for(i=0;i<size_north;i++)//for adding the brackets around dOP1b
+	          {
+	          	tempo_dOP1b[i][0] = '(';
+	          	for(j=0;Character.isLetterOrDigit(dOP1b[i][j])==true || dOP1b[i][j]=='+'||dOP1b[i][j]=='.'||dOP1b[i][j]=='~'||dOP1b[i][j]=='^'||dOP1b[i][j]=='('||dOP1b[i][j]==')';j++)
+	          	{
+	          		tempo_dOP1b[i][j+1] = dOP1b[i][j];
+	          	}
+	          	if(j==1)
+	          	{
+	          		tempo_dOP1b[i][0] = dOP1b[i][0];
+	          		tempo_dOP1b[i][1] = '?';     //character added which wont suffice many conditions for various loops afterwards
+	          	}
+	          	else
+	          		tempo_dOP1b[i][j+1] = ')';
+	          	
+	          }
+	          
+	          int p,q;
+	          int an1;
+	          int an2 =0;
+	          p=0;
+	          for(k =0,an1 =0; k< size_north; k++,an1++)//dOP2bOP1a is starting
+	          {
+	           	for(l=0,an2=0;l < north[k].length ;l++ )
+	           	{
+		          	if(north[k][l] == '+' || north[k][l] == '^' || north[k][l] == '~' || north[k][l] == '.' || north[k][l] == '(' || north[k][l] == ')')
+		          	{	dOP2bOP1a[an1][an2] = north[k][l];
+		          		
+		          		an2++;
+		          	}
+		          	else{
+			          	  
+				           
+				           for(i=0; i< size_east; i++)
+				           {	
+				           	 for(j=0; j < east[i].length; j++)
+				           		{
+				           			
+				           			if(east[i][j] == north[k][l])
+				           			{
+				           			           				
+			           					for(q = 0;Character.isLetterOrDigit(tempo_dOP2b[i][q])==true || tempo_dOP2b[i][q]=='+'||tempo_dOP2b[i][q]=='.'||tempo_dOP2b[i][q]=='~'||tempo_dOP2b[i][q]=='^'||tempo_dOP2b[i][q]=='('||tempo_dOP2b[i][q]==')';q++)
+			           					{
+			           						dOP2bOP1a[an1][an2] = tempo_dOP2b[i][q];
+			           						an2++;
+			           					}
+			           					
+			           					
+				           			}
+				           		}
+				           		
+				           		
+				           }
+				           for(i=0; i< size_south; i++)
+				           {	
+				           	 for(j=0;j<south[i].length ; j++)
+				           		{
+				           			if(south[i][j] == north[k][l] )
+				           				{	
+				           					dOP2bOP1a[an1][an2] = a[i];
+				           					an2++;
+				           					
+				           				}
+				           		}
+				           		//System.out.println("\n outside for \n");
+				           }
+				         }
+			     }
+		   	  }
+		   	  
+		   	  //-----------------------------------------------------------------------
+		   //working on cOP2dOP1b
+		   
+		   for(k =0,an1 =0; k< size_west; k++,an1++)//cOP2dOP1b is starting
+	          {
+	           	for(l=0,an2=0;l < west[k].length ;l++ )
+	           	{
+		          	if(west[k][l] == '+' || west[k][l] == '^' || west[k][l] == '~' || west[k][l] == '.' || west[k][l] == '(' || west[k][l] == ')')
+		          	{	
+		          		cOP2dOP1b[an1][an2] = west[k][l];
+		          		an2++;
+		          	}
+		          	else
+		          		{
+			          	  
+				           
+				           for(i=0; i< size_south; i++)
+				           {	
+				           	 for(j=0; j < south[i].length; j++)
+				           		{
+				           			
+				           			if(south[i][j] == north[k][l])
+				           			{
+				           			           				
+			           					for(q = 0;Character.isLetterOrDigit(tempo_dOP1b[i][q])==true || tempo_dOP1b[i][q]=='+'||tempo_dOP1b[i][q]=='.'||tempo_dOP1b[i][q]=='~'||tempo_dOP1b[i][q]=='^'||tempo_dOP1b[i][q]=='('||tempo_dOP1b[i][q]==')';q++)
+			           					{
+			           						
+			           						
+			           						cOP2dOP1b[an1][an2] = tempo_dOP1b[i][q];
+			           						an2++;
+			           					}
+			           					
+			           					
+				           			}
+				           		}
+				           		
+				           		
+				           }
+				           for(i=0; i< size_east; i++)
+				           {	
+				           	 for(j=0;j<east[i].length ; j++)
+				           		{
+				           			if(east[i][j] == north[k][l] )
+				           				{	
+				           					cOP2dOP1b[an1][an2] = c[i];
+				           					an2++;
+				           					
+				           				}
+				           		}
+				           		
+				           }
+				         }
+			     }
+		   	  }
+		   	  //-----------------------------------------------------------------------
+		   //working on cOP1dOP1b
+		   
+		   for(k =0,an1 =0; k< size_north; k++,an1++)//cOP1dOP1b is starting
+	          {
+	           	for(l=0,an2=0;l < north[k].length ;l++ )
+	           	{
+		          	if(north[k][l] == '+' || north[k][l] == '^' || north[k][l] == '~' || north[k][l] == '.' || north[k][l] == '(' || north[k][l] == ')')
+		          	{	
+		          		cOP1dOP1b[an1][an2] = north[k][l];
+		          		an2++;
+		          	}
+		          	else
+		          		{
+			          	  
+				           
+				           for(i=0; i< size_south; i++)
+				           {	
+				           	 for(j=0; j < south[i].length; j++)
+				           		{
+				           			
+				           			if(south[i][j] == north[k][l])
+				           			{
+				           			           				
+			           					for(q = 0;Character.isLetterOrDigit(tempo_dOP1b[i][q])==true || tempo_dOP1b[i][q]=='+'||tempo_dOP1b[i][q]=='.'||tempo_dOP1b[i][q]=='~'||tempo_dOP1b[i][q]=='^'||tempo_dOP1b[i][q]=='('||tempo_dOP1b[i][q]==')';q++)
+			           					{
+			           						
+			           						
+			           						cOP1dOP1b[an1][an2] = tempo_dOP1b[i][q];
+			           						an2++;
+			           					}
+			           					
+			           					
+				           			}
+				           		}
+				           		
+				           		
+				           }
+				           for(i=0; i< size_east; i++)
+				           {	
+				           	 for(j=0;j<east[i].length ; j++)
+				           		{
+				           			if(east[i][j] == north[k][l] )
+				           				{	
+				           					cOP1dOP1b[an1][an2] = c[i];
+				           					an2++;
+				           					
+				           				}
+				           		}
+				           		
+				           }
+				         }
+			     }
+		   	  }	  
+		   	  	
+		   	  	
+		   	  	
+		   	 //for converting dOP2bOP1a character array(2-D) to a string array(1-D)
+	         
+	         String dOP2bOP1a_2[] = new String[size_north];
+	         String temp;
+	         
+	         for(i=0;i<size_north;i++)
+	         {
+	         	dOP2bOP1a_2[i] = "";
+	         	for(j=0;Character.isLetterOrDigit(dOP2bOP1a[i][j])==true || dOP2bOP1a[i][j]=='+'||dOP2bOP1a[i][j]=='.'||dOP2bOP1a[i][j]=='~'||dOP2bOP1a[i][j]=='^'||dOP2bOP1a[i][j]=='('||dOP2bOP1a[i][j]==')';j++)
+	         	{
+	         		temp = String.valueOf(dOP2bOP1a[i][j]);
+	          	 	dOP2bOP1a_2[i] = dOP2bOP1a_2[i].concat(temp); 
+	         	}
+	         }
+	         
+	         
+
+	         
+	         //for converting cOP2dOP1b character array(2-D) to a string array(1-D)
+	         
+	         String cOP2dOP1b_2[] = new String[size_west];
+	         
+	         
+	         for(i=0;i<size_west;i++)
+	         {
+	         	cOP2dOP1b_2[i] = "";
+	         	for(j=0;Character.isLetterOrDigit(cOP2dOP1b[i][j])==true || cOP2dOP1b[i][j]=='+'||cOP2dOP1b[i][j]=='.'||cOP2dOP1b[i][j]=='~'||cOP2dOP1b[i][j]=='^'||cOP2dOP1b[i][j]=='('||cOP2dOP1b[i][j]==')';j++)
+	         	{
+	         		temp = String.valueOf(cOP2dOP1b[i][j]);
+	          	 	cOP2dOP1b_2[i] = cOP2dOP1b_2[i].concat(temp); 
+	         	}
+	         }
+	         
+
+	         
+	             
+	         String cOP1dOP1b_2[] = new String[size_west];
+	         
+	         
+	         for(i=0;i<size_north;i++)
+	         {
+	         	cOP1dOP1b_2[i] = "";
+	         	for(j=0;Character.isLetterOrDigit(cOP1dOP1b[i][j])==true || cOP1dOP1b[i][j]=='+'||cOP1dOP1b[i][j]=='.'||cOP1dOP1b[i][j]=='~'||cOP1dOP1b[i][j]=='^'||cOP1dOP1b[i][j]=='('||cOP1dOP1b[i][j]==')';j++)
+	         	{
+	         		temp = String.valueOf(cOP1dOP1b[i][j]);
+	          	 	cOP1dOP1b_2[i] = cOP1dOP1b_2[i].concat(temp); 
+	         	}
+	         }
+	         
+
+	         
+	        // for converting dOP1b character array(2-D) to a string array(1-D) 
+	         String dOP1b_2[] = new String[size_north];
+	         
+	         for(i=0;i<size_north;i++)
+	         {
+	         	dOP1b_2[i] = "";
+	         	for(j=0;Character.isLetterOrDigit(dOP1b[i][j])==true || dOP1b[i][j]=='+'||dOP1b[i][j]=='.'||dOP1b[i][j]=='~'||dOP1b[i][j]=='^'||dOP1b[i][j]=='('||dOP1b[i][j]==')';j++)
+	         	{
+	         		temp = String.valueOf(dOP1b[i][j]);
+	          	 	dOP1b_2[i] = dOP1b_2[i].concat(temp); 
+	         	}
+	         }
+	         
+	         // for converting dOP2b character array(2-D) to a string array(1-D) 
+	         String dOP2b_2[] = new String[size_west];
+	         
+	         for(i=0;i<size_west;i++)
+	         {
+	         	dOP2b_2[i] = "";
+	         	for(j=0;Character.isLetterOrDigit(dOP2b[i][j])==true || dOP2b[i][j]=='+'||dOP2b[i][j]=='.'||dOP2b[i][j]=='~'||dOP2b[i][j]=='^'||dOP2b[i][j]=='('||dOP2b[i][j]==')';j++)
+	         	{
+	         		temp = String.valueOf(dOP2b[i][j]);
+	          	 	dOP2b_2[i] = dOP2b_2[i].concat(temp); 
+	         	}
+	         }
+	         
+	         
+	         //making the inputs for compact 3 way
+	         
+	         String north_ip[] = new String[3*size_north];
+	         String east_ip[] = new String[size_north+(2*size_east)];
+	         String south_ip[] = new String[3*size_north];
+	         String west_ip[] = new String[size_north+(2*size_east)];
+	         
+	         //making the north side inputs
+	         	         
+	         for(i=0;i<size_north;i++)
+	         {
+	         	north_ip[i] = dOP2bOP1a_2[i];
+	      	 }
+	      	 
+	      	 for(j=0;j<size_north;j++,i++)
+	      	 {
+	      	 	north_ip[i] = cOP1dOP1b_2[j];
+	    	 }
+	    	 
+	    	 for(j=0;j<size_north;j++,i++)
+	      	 {
+	      	 	north_ip[i] = dOP1b_2[j];
+	    	 }
+	    	 
+	    	 //making the east side inputs
+	    	 
+	    	 for(i=0;i<size_east;i++)
+	         {
+	         	east_ip[i] = String.valueOf(c[i]);
+	      	 }
+	      	 
+	      	 for(j=0;j<size_north;j++,i++)
+	      	 {
+	      	 	east_ip[i] = dOP1b_2[j];
+	    	 }
+	    	 
+	    	 for(j=0;j<size_east;j++,i++)
+	      	 {
+	      	 	east_ip[i] = String.valueOf(d[j]);
+	    	 }
+	    	 
+	    	 //making the south side inputs
+	    	 
+	    	 for(i=0;i<size_north;i++)
+	         {
+	         	south_ip[i] = String.valueOf(a[i]);
+	      	 }
+	      	 
+	      	 for(j=0;j<size_north;j++,i++)
+	      	 {
+	      	 	south_ip[i] = dOP1b_2[j];
+	    	 }
+	    	 
+	    	 for(j=0;j<size_north;j++,i++)
+	      	 {
+	      	 	south_ip[i] = String.valueOf(b[j]);
+	    	 }
+	    	 
+	    	 //making the west side inputs
+	    	 
+	    	 for(i=0;i<size_west;i++)
+	         {
+	         	west_ip[i] = cOP2dOP1b_2[i];
+	      	 }
+	      	 
+	      	 for(j=0;j<size_north;j++,i++)
+	      	 {
+	      	 	west_ip[i] = dOP2bOP1a_2[j];
+	    	 }
+	    	 
+	    	 for(j=0;j<size_west;j++,i++)
+	      	 {
+	      	 	west_ip[i] = dOP2b_2[j];
+	    	 }
+	         
+	         //printing the results
+	         
+	         for(i=0;i<3*size_north;i++)
+	         {
+	         	//System.out.printf("%s\n",north_ip[i]);
+	         }
+	         for(i=0;i<(2*size_east)+size_north;i++)
+	         {
+	         	//System.out.printf("%s\n",east_ip[i]);
+	         }
+	         for(i=0;i<3*size_south;i++)
+	         {
+	         	//System.out.printf("%s\n",south_ip[i]);
+	         }
+	
+	         for(i=0;i<(2*size_east)+size_north;i++)
+	         {
+	         	//System.out.printf("%s\n",west_ip[i]);
+	         }
+	         
+	 	//sending the parameters to the computationa tile transformer tilegen.java
+	          
+	         tilegen2 compute = new tilegen2();
+	        
+	         compute.computation(3*size_north,(2*size_east)+size_north,3*size_south,(2*size_east)+size_north,north_ip,east_ip,south_ip,west_ip);
+	         
+	         	         
+	         String d_1[] = new String[1000];
+	         String b_1[] = new String[1000];
+	         String ipv,iph;
+	         
+	         //System.out.println("enter input which would be provided through the west side of vertical frame tiles\n");
+	         //	ipv = input1.nextLine();
+	         //System.out.println("enter input which would be provided through the north side of horizontal frame tiles\n");
+	         //	iph = input2.nextLine();
+	         
+	        ipv = frameip1.getText();
+	        iph = frameip2.getText();
+	       
+	        
+	         int nt = ipv.length()/size_east; 
+	         k = 0;//we think something is wrong regarding the filling of c_1 array its order that is
+	         for(i = nt-1;i >= 0 ; i--)
+	         {
+	         	d_1[i] = "";
+	         	for(j=0;j < size_east;j++,k++)
+	         	{
+	         		d_1[i] = d_1[i].concat(String.valueOf(ipv.charAt(k)));
+	         	}
+	         }
+	         
+	         char d_vframe[][] = new char[nt][size_east];
+	         int end = i;
+	         //System.out.println("\nbegiinning\n");
+	         for(i=0; i<nt; i++)
+	         {
+	         		//System.out.printf("\n %c\n",d_1[i].charAt(0));
+	         		d_vframe[i] = d_1[i].toCharArray();
+	         	
+	         }
+	         //System.out.println("\n end\n");
+	         int num_tiles=nt;
+	         //System.out.printf("\n no. is %d\n",num_tiles);
+	         
+	         
+	         int nt_2 = iph.length()/size_north; 
+	         //System.out.printf("\n nt2. is %d\n",nt_2);
+	         k = 0;
+	         for(i = nt_2-1;i >=0; i--)
+	         {
+	         	b_1[i] = "";
+	         	for(j=0;j < size_north;j++,k++)
+	         	{
+	         	//	System.out.printf("\n %d  %d  %d\n",i,j,k);
+	         		b_1[i] = b_1[i].concat(String.valueOf(iph.charAt(k)));
+	         		
+	         	}
+	         }
+	         
+	         
+	         char b_vframe[][] = new char[nt_2][size_north];
+	         for(i=0;i < nt_2; i++)
+	         {
+	         		b_vframe[i] = b_1[i].toCharArray();
+	         	
+	         }
+	         
+	         for(i=0;i<nt_2;i++)
+	         {
+	         	//System.out.println("\n");
+	         	for(j=0;j<size_north;j++)
+	         	{
+	         	//	System.out.printf("\ni am bvframe %c and i j are  %d %d\n",b_vframe[i][j],i,j);
+	         	}
+	         }
+	         
+	          //starting to make vertical frame tile
+	         char n_vframe[][] = new char[1000][size_east+size_north];
+	         char s_vframe[][] = new char[1000][size_east+size_north];
+	         char w_vframe[][] = new char[1000][(2*size_east)+size_north];
+	         
+	         
+	         char s1[][] = new char[1000][size_north];
+	         char s2[][] = new char[1000][size_east];
+	         //String s3[] = new String[1000];
+	         
+	         char b_temp[][] = new char[1000][size_north];
+	         
+	         
+	         /*	for(j=0;j<size_north;j++)
+	         		b_temp[0][j] = b_vframe[0][j];
+	         	*/	
+	         //giving btemp[0][j] the right value which is bop1c for the initial vertical frame tile
+	          char dOP1b_vframe[][] = new char[size_north][1000];
+	          int m=0;
+	         an1 = 0;
+	         an2 = 0;
+	         
+	         for(p=0; p< size_south; p++)
+				           {	
+				           	 for(q=0;q < south[p].length; q++)         
+				           		{
+				           				b_temp[0][p] = b_vframe[0][p];
+				           				      			
+				           		}
+				           }
+	         
+	         
+	         //--------------------------------------------------------------------------------------		
+	         		
+	         // putting glue table[][] in 1-d glue table	  
+		   int high = compute.getMaxGlue();
+		   //System.out.printf("\n high is %d \n",high);
+		   int glue[][] = compute.getGlue_table();
+			int index[] =compute.getIndex();
+		     
+	       String glue_table[] = new String[compute.getMaxGlue()+1];
+	       
+	       String init_wvframe[] = new String[1000];
+	       String tempor;
+	       for(i=0;i<=high;i++)
+	       {
+	       	tempor="";
+	       	
+	       	for(j=0;j<index[i];j++ )
+	       	{
+	       		tempor = tempor.concat(String.valueOf(glue[i][j]));
+	       	}
+	       //	System.out.printf("\n tempor is %s \n",tempor);
+	       	glue_table[i] = tempor;
+	       	
+	       }
+	      	
+	      	
+	      
+		  String vwest_glues[] = new String[1000]; 	 
+		  String vnorth_glues[] = new String[1000];
+	      String vsouth_glues[] = new String[1000]; 	 
+		   	 
+		//  System.out.printf("\n i am high glues %s\n",high);
+		  int flag = 0;
+		  
+		  for(i=0,m=0;flag==0;i++)
+	         {	
+	         	j = 0;
+	         	m = 0;
+	         //	s3[i] = dectobin(i,padd_bits);
+	         //	System.out.printf("\n s3 is %s\n",s3[i]);
+	         	
+	           for(k =0; k< size_north; k++,an1++)  //scanning the north side for computing bOP1c
+	           {
+	           	
+	           	for(l=0,an2=0; l< north[k].length; l++)
+	           	{
+		          	if(north[k][l] == '+' || north[k][l] == '^' || north[k][l] == '~' || north[k][l] == '.' || north[k][l] == '(' || north[k][l] == ')')
+		          		{
+		          			dOP1b_vframe[k][an2] = north[k][l];
+		          			
+		          			an2++;
+		          			//System.out.println("i m here also");
+		          		}
+		          	
+		          	else{
+			          	  for(p=0; p< size_south; p++)
+				           {	
+				           	 for(q=0;q < south[p].length; q++)
+				           		{
+				           			if(south[p][q] == north[k][l])
+				           			{
+				           				//System.out.printf("\n i and j are %d %d \n",i,p);
+				           				//System.out.printf("\ni m here and btemp is %c \n",b_temp[i][p]);
+				           				dOP1b_vframe[k][an2] = b_temp[i][p];
+				           				j++;
+				           				
+				           				an2++;
+				           				//System.out.printf("%d %d\n",k,l);
+				           			}
+				           		}
+				           }
+				           
+				           for(p=0; p< size_east; p++)
+				           {	
+				           	 for(q=0; q< east[p].length; q++)
+				           		{
+				           			if(east[p][q] == north[k][l])
+				           			{
+				           				
+				           				dOP1b_vframe[k][an2] = d_vframe[i%nt][p];
+				           				m++;			           				
+				           				an2++;	
+				           				//System.out.println("i m here also also");
+				           			}
+				           		}
+				           }
+				         }
+			        
+		         }
+		   	  }
+		   	  
+		   	  
+		   	  
+		   	 String compu[] = new String[size_north];
+		   	 for(p=0; p< size_north;p++)
+		   	 {
+		   	 	compu[p] = "";
+		   	 	for(q=0; q<north[p].length; q++)
+		   	 	{
+		   	 		compu[p] = compu[p].concat(String.valueOf(dOP1b_vframe[p][q]));
+		   	 	}
+		   	 }
+		  
+		   	int z;
+		   	  
+		   	  
+	         	for(z=0,p=0;  z < size_north ; z++)
+	         	{
+	         		char test[] = infixtopostfix(compu[p]);
+	         		
+	         		
+	         		
+	         			b_temp[i+1][z] = EvaluatePf(String.copyValueOf(test));
+	         		p++;
+	         		s1[i][z] = b_temp[i+1][z];
+	         	}
+
+	         
+	         for(int ptr=0; ptr < size_east; ptr++)
+	         {
+	         	s2[i][ptr] = d_vframe[i%nt][ptr];
+	         }
+	         
+		   
+		   	 
+		   	 	for(z=0,j=0; z<size_north; z++)
+		   	 	{
+		   	 		s_vframe[i][j] = s1[i][z];
+		   	 		j++;
+		   	 	}
+		   	 
+	   	  
+	   	 	for(z=0; z<size_east; z++)
+	   	 	{
+	   	 		s_vframe[i][j] = s2[i][z];
+	   	 		j++;
+	   	 	}
+	   	
+	      
+	      
+	      
+	      	for(j=size_north,k=0; j < (size_east+size_north); j++,k++)
+	      	{
+	      		w_vframe[i][k] = s_vframe[i][j];
+	      	//	System.out.println("\n hi ppl");
+	      	}
+	      	for(j=0;j < size_north;j++,k++)
+	      	{
+	      		w_vframe[i][k] = s_vframe[i][j];
+	      	//	System.out.println("\n hi ppl");
+	      	}
+	      	for(j=size_north; j < (size_east+size_north); j++,k++)//new addition
+	      	{
+	      		w_vframe[i][k] = s_vframe[i][j];
+	      	//	System.out.println("\n hi ppl");
+	      	} 
+	        
+	        //	System.out.printf("\nwvframe only is %c\n",w_vframe[i][p]) ;
+	        init_wvframe[i] = String.copyValueOf(w_vframe[i]); 
+	        
+	        for(j=1;j<=compute.getMaxGlue();j++)
+	        {
+	        //	System.out.printf("\n i m init vframe %s and length is %d and gluetable is %s and length%d \n",init_wvframe[i],init_wvframe[i].length(),glue_table[j],glue_table[j].length());
+		        if(init_wvframe[i].compareTo(glue_table[j])==0)
+		      	{
+		      //	System.out.println("\n i am checking glues ");
+		      		vwest_glues[i] = String.valueOf(j);
+		      //	System.out.printf("\nglue = %s\n",vwest_glues[i]);
+		      	}
+	      	}  	
+	      	
+	      	
+	      	if(String.copyValueOf(s_vframe[i]).compareTo(String.copyValueOf(s_vframe[i%nt]))==0 && i>=nt)
+	      	{
+	      		vsouth_glues[i] = vsouth_glues[i%nt];
+	      	//	System.out.printf("\nin spcl. condn. v2[ipernt]= %s are and ipernt is %d and i is %d \n",vsouth_glues[i%nt],i%nt,i);
+	      		flag = 1;
+	      	//	System.out.printf("\nin spcl. cond.v1= %s and v2= %s are",String.copyValueOf(s_vframe[i]),String.copyValueOf(s_vframe[i%nt]));
+	      	}
+	      	else
+	      	{	
+	      	//	System.out.printf("\nv1= %s and v2= %s are",String.copyValueOf(s_vframe[i]),String.copyValueOf(s_vframe[i%nt]));
+	      		vsouth_glues[i] = String.valueOf(++high);
+	      	}	 
+	      	
+	      }
+	      
+		  int nt2;
+	      nt2 = i-1;
+	      
+	 		 
+	 		 for(i=0;i<nt2;i++)
+	         {
+	         	vnorth_glues[i] = vsouth_glues[i+1];
+	         } 
+	         
+	        // for(i=0;i<nt2;i++)
+	         //	System.out.printf("\n%s  %s  %s  %s  \n",vnorth_glues[i],"0",vsouth_glues[i],vwest_glues[i])   ;  
+	         		
+	         		
+	      // end of vertical frame computation
+	     //------------------------------------------------------------------------------------
+	     //starting horizontal frame computation
+	     
+	     //starting to horizontal frame tile
+	         char n_hframe[][] = new char[1000][3*size_north];
+	         char e_hframe[][] = new char[1000][size_east+size_north];
+	         char w_hframe[][] = new char[1000][size_east+size_north];
+	         
+	         
+	         
+	         
+	         char d_temp[][] = new char[1000][size_east];
+	         
+	         for(p=0; p< size_east; p++)
+				           {	
+				           	 for(q=0;q < east[p].length; q++)         
+				           		{
+				           				d_temp[0][p] = d_vframe[0][p];
+				           				      			
+				           		}
+				           }
+	         
+	         
+	          String hwest_glues[] = new String[1000]; 	 
+			  String hnorth_glues[] = new String[1000];
+		      String heast_glues[] = new String[1000];
+		      
+		      char ss1[][] = new char[1000][size_north];
+		      char ss2[][] = new char[1000][size_north];
+		      char ss_vframe[][] = new char[1000][size_east+size_north];
+		      //---------------------------------------------------------------------
+		      //big loop
+		      flag = 0;
+		      String init_nhframe[] = new String[1000];
+		   	 
+	         for(i=0,m=0;flag==0;i++)
+	         {	
+	         	j = 0;
+	         	m = 0;
+	         //	s3[i] = dectobin(i,padd_bits);
+	         //	System.out.printf("\n s3 is %s\n",s3[i]);
+	         	
+	           for(k =0,an1=0; k< size_north; k++,an1++)  //scanning the north side for computing bOP1c
+	           {
+	           	
+	           	for(l=0,an2=0; l< north[k].length; l++)
+	           	{
+		          	if(north[k][l] == '+' || north[k][l] == '^' || north[k][l] == '~' || north[k][l] == '.' || north[k][l] == '(' || north[k][l] == ')')
+		          		{
+		          			dOP1b_vframe[k][an2] = north[k][l];
+		          			
+		          			an2++;
+		          	//		System.out.println("i m here also");
+		          		}
+		          	
+		          	else{
+			          	  for(p=0; p< size_south; p++)
+				           {	
+				           	 for(q=0;q < south[p].length; q++)
+				           		{
+				           			if(south[p][q] == north[k][l])
+				           			{
+				           				dOP1b_vframe[k][an2] = b_vframe[i%nt_2][p];
+				           				j++;
+				           				
+				           				an2++;
+				           				//System.out.printf("%d %d\n",k,l);
+				           			}
+				           		}
+				           }
+				           
+				           for(p=0; p< size_east; p++)
+				           {	
+				           	 for(q=0; q< east[p].length; q++)
+				           		{
+				           			if(east[p][q] == north[k][l])
+				           			{
+				           				
+				           				dOP1b_vframe[k][an2] = d_temp[i][p];
+				           				m++;			           				
+				           				an2++;	
+				           			//	System.out.println("i m here also also");
+				           			}
+				           		}
+				           }
+				         }
+			        
+		         }
+		   	  }
+		   	  
+		   	  
+		   	  
+		   	 String compu[] = new String[size_north];
+		   	 for(p=0; p< size_north;p++)
+		   	 {
+		   	 	
+		   	 	compu[p] = "";
+		   	 	for(q=0; q<north[p].length; q++)
+		   	 	{
+		   	 		compu[p] = compu[p].concat(String.valueOf(dOP1b_vframe[p][q]));
+		   	 	}
+		   	 }
+		   	 for(p=0;p<size_north;p++)
+		   	 {
+		   	 	
+		   	 //	System.out.printf("\ni m compu %s\n",compu[p]);
+		   	 }
+		   	  int z;
+		   	  
+		   	  
+	         	for(z=0,p=0;  z < size_north ; z++)
+	         	{
+	         		char test[] = infixtopostfix(compu[p]);
+	         		
+	         		for(int g=0; g <size_north;g++)
+	         		//	System.out.printf("\n %s here is a string\n",String.copyValueOf(test));
+	         		
+	         			ss1[i][z] = EvaluatePf(String.copyValueOf(test));
+	         		p++;
+	         		
+	         	}
+	         	//------------------------------------------------------------calculating d_temp again which would be dOP2b
+	         	char dOP2b_temp[][] = new char[size_east][1000];
+	           for(k =0; k< size_west; k++,an1++)  //scanning the east side for computing dOP2b
+	           {
+	           	
+	           	for(l=0,an2=0; l< west[k].length; l++)
+	           	{
+		          	if(west[k][l] == '+' || west[k][l] == '^' || west[k][l] == '~' || west[k][l] == '.' || west[k][l] == '(' || west[k][l] == ')')
+		          		{
+		          			dOP2b_temp[k][an2] = west[k][l];
+		          			
+		          			an2++;
+		          		//	System.out.println("i m here also");
+		          		}
+		          	
+		          	else{
+			          	  for(p=0; p< size_south; p++)
+				           {	
+				           	 for(q=0;q < south[p].length; q++)
+				           		{
+				           			if(south[p][q] == north[k][l])
+				           			{
+				           				dOP2b_temp[k][an2] = b_vframe[i%nt_2][p];
+				           				j++;
+				           				
+				           				an2++;
+				           				//System.out.printf("%d %d\n",k,l);
+				           			}
+				           		}
+				           }
+				           
+				           for(p=0; p< size_east; p++)
+				           {	
+				           	 for(q=0; q< east[p].length; q++)
+				           		{
+				           			if(east[p][q] == north[k][l])
+				           			{
+				           				
+				           				dOP2b_temp[k][an2] = d_temp[i][p];
+				           				m++;			           				
+				           				an2++;	
+				           			//	System.out.println("i m here also also");
+				           			}
+				           		}
+				           }
+				         }
+			        
+		         }
+		   	  }
+	         	
+	         	
+	         for(p=0; p< size_west;p++)
+		   	 {
+		   	 	
+		   	 	compu[p] = "";
+		   	 	for(q=0; q<west[p].length; q++)
+		   	 	{
+		   	 		compu[p] = compu[p].concat(String.valueOf(dOP2b_temp[p][q]));
+		   	 	}
+		   	 }
+		   	 for(p=0;p<size_west;p++)
+		   	 {
+		   	 	
+		   	 	//System.out.printf("\ni m compu %s\n",compu[p]);
+		   	 }
+		   	  
+		   	  
+		   	  
+	         	for(z=0,p=0;  z < size_west ; z++)
+	         	{
+	         		char test[] = infixtopostfix(compu[p]);
+	         		
+	         	//	for(int g=0; g <size_north;g++)
+	         	//		System.out.printf("\n %s here is a string\n",String.copyValueOf(test));
+	         		
+	         			d_temp[i+1][z] = EvaluatePf(String.copyValueOf(test));
+	         	//		System.out.printf("i am dOP2b and = %c \n",d_temp[i+1][z]);
+	         		p++;
+	         		
+	         	}
+	         	
+	         	
+	         	//---------------------------------------------------------
+	         	
+	         	
+	         	
+	         //for(z =0; z< size_west; z++)
+	         	//System.out.printf("\n i m d_temp %c\n",d_temp[i][z]);
+	         int ptr2;
+	         for(ptr2=0; ptr2< size_south; ptr2++)
+	         {
+	         	ss2[i][ptr2] = b_vframe[i%nt_2][ptr2];
+	         }
+	         
+		   	 for(ptr2=0; ptr2 < size_south; ptr2++)
+		   	 {
+		   	 //	System.out.printf("\n i am b_vframe %c \n",b_vframe[i%nt_2][ptr2]);
+		   	 }
+		   	 
+		   	 	for(z=0,j=0; z<size_east; z++)
+		   	 	{
+		   	 		ss_vframe[i][j] = d_temp[i+1][z];
+		   	 		j++;
+		   	 	}
+		   	 
+	   	  
+	   	 	for(z=0; z<size_south; z++)
+	   	 	{
+	   	 		ss_vframe[i][j] = ss2[i][z];
+	   	 		j++;
+	   	 	}
+	   	 
+	   	 	//System.out.println("tot ss_vframe is ");
+	   	 	for(p=0;p<size_east+size_north;p++)
+	   	 	//	System.out.printf("%s",ss_vframe[i][p]);
+		   	// System.out.println();
+	        //now west side of vertical frame tile are filling
+	      
+	      
+	      
+	      
+	      	for(j=0,k=0; j < size_north; j++,k++)
+	      	{
+	      		n_hframe[i][k] = ss2[i][j];
+	      	//	System.out.println("\n hi ppl");
+	      	}
+	      	for(j=0;j < size_north;j++,k++)
+	      	{
+	      		n_hframe[i][k] = ss1[i][j];
+	      	//	System.out.println("\n hi ppl");
+	      	} 
+	      	for(j=0; j < size_north; j++,k++)
+	      	{
+	      		n_hframe[i][k] = ss2[i][j];
+	      	//	System.out.println("\n hi ppl");
+	      	}
+	      	
+	        for(p=0;p<3*size_north;p++)
+	        //	System.out.printf("\nn_hframe only is %c\n",n_hframe[i][p]) ;
+	        init_nhframe[i] = String.copyValueOf(n_hframe[i]); 
+	        
+	        for(j=1;j<=compute.getMaxGlue();j++)
+	        {
+	        //	System.out.printf("\n i m init nhframe %s and length is %d and gluetable is %s and length%d \n",init_nhframe[i],init_nhframe[i].length(),glue_table[j],glue_table[j].length());
+		        if(init_nhframe[i].compareTo(glue_table[j])==0)
+		      	{
+		      //		System.out.println("\n i am checking glues ");
+		      		hnorth_glues[i] = String.valueOf(j);
+		      //		System.out.printf("\nglue = %s\n",hnorth_glues[i]);
+		      	}
+	      	}  	
+	      	
+	      	
+	      	if(String.copyValueOf(ss_vframe[i]).compareTo(String.copyValueOf(ss_vframe[i%nt_2]))==0 && i>=nt_2)
+	      	{
+	      		heast_glues[i] = String.valueOf(++high);
+	      		heast_glues[i+1] = heast_glues[(i%nt_2)+1];
+	      		
+	      	//	System.out.printf("\nin spcl. condn. v2[ipernt]= %s are and ipernt is %d and i is %d \n",heast_glues[i%nt_2],i%nt_2,i);
+	      		flag = 1;
+	      	//	System.out.printf("\nin spcl. cond.v1= %s and v2= %s are",String.copyValueOf(ss_vframe[i]),String.copyValueOf(ss_vframe[i%nt_2]));
+	      	}
+	      	else
+	      	{	
+	      	//	System.out.printf("\nv1= %s and v2= %s are",String.copyValueOf(ss_vframe[i]),String.copyValueOf(ss_vframe[i%nt_2]));
+	      		heast_glues[i] = String.valueOf(++high);
+	      	}	 
+	      	
+	      }
+		      //------------------end big loop
+		      
+		  int nt3;
+	      nt3 = i;
+	      
+	 		 
+	 		 for(i=0;i<nt3;i++)
+	         {
+	         	hwest_glues[i] = heast_glues[i+1];
+	         } 
+	         
+	         //for(i=0;i<nt3;i++)
+	         //	System.out.printf("\n%s  %s  %s  %s  \n",hnorth_glues[i],heast_glues[i],"0",hwest_glues[i])   ;     
+	         	
+	     	 int array[][] = compute.compuglues();
+	         int numglu = compute.glunum();   	
+	        
+	        
+	         String timedp = tilegen12.now();
+	         String com3d = "";
+	        com3d = com3d.concat("/*This .tiles file was generated using XTile 1.2 for 3 way Compact error correction scheme").concat("at ").concat(timedp);
+			com3d = com3d.concat("\n").concat("developed by Anshul Chaurasia, Sudhanshu Dwivedi and Prateek Jain, DA-IICT,INDIA");
+			com3d = com3d.concat("\n").concat("detailed documentation and tool available at www.guptalab.org/xtile");
+			com3d = com3d.concat("\n").concat("this .tiles file is input to Xgrow  developed by Eric Winfree, Caltech ").concat("*/");
+			com3d = com3d.concat("\n");
+	    	     
+	         
+	         
+	         com3d = com3d.concat("tile edges matches {{N E S W}*}").concat("\n");
+			 com3d = com3d.concat("num tile types=").concat(String.valueOf(compute.compuRows()+nt2+nt3+1)).concat("\n");//+1 for seed
+			 com3d = com3d.concat("num binding types=").concat(String.valueOf(compute.getMaxGlue()+nt2+nt3)).concat("\n");
+			 com3d = com3d.concat("tile edges={").concat("\n");
+			 
+			 com3d = com3d.concat("{").concat(vsouth_glues[0]).concat(" ").concat("0").concat(" ").concat("0").concat(" ").concat(heast_glues[0]).concat("}").concat("\n");
+			 for(i=0;i<nt3;i++)
+	      		com3d = com3d.concat("{").concat(hnorth_glues[i]).concat(" ").concat(heast_glues[i]).concat(" ").concat("0").concat(" ").concat(hwest_glues[i]).concat("}").concat("\n");
+	      	 for(i=0;i<nt2;i++)
+	         	com3d = com3d.concat("{").concat(vnorth_glues[i]).concat(" ").concat("0").concat(" ").concat(vsouth_glues[i]).concat(" ").concat(vwest_glues[i]).concat("}").concat("\n");
+			 for(i=0;i<numglu;i++)
+			 {
+			 	com3d = com3d.concat("{").concat(String.valueOf(array[i][0])).concat(" ").concat(String.valueOf(array[i][1])).concat(" ").concat(String.valueOf(array[i][2])).concat(" ").concat(String.valueOf(array[i][3])).concat("}").concat("\n");
+			 }
+
+			 
+			 
+	         com3d = com3d.concat("}").concat("\n");
+	         com3d = com3d.concat("binding strengths=").concat("\n").concat("{");
+	         for(i=0;i<compute.getMaxGlue();i++)
+	         	com3d = com3d.concat("1").concat("\t");
+	         for(i=0;i<nt2;i++)
+	         	com3d = com3d.concat("2").concat("\t");
+	         for(i=0;i<nt3;i++)
+	         	com3d = com3d.concat("2").concat("\t");
+	         com3d = com3d.concat("}");
+	         //output.close();
+         compact3.setText(com3d + newline);
+		   
+		  
+		  repaint();
+		  
+			}
+	/*	catch ( SecurityException securityException )
+      	{
+         System.err.println("You do not have write access to this file." );
+         //System.exit( 1 );
+      	} // end catch*/
+     /* 	catch ( FileNotFoundException filesNotFoundException )
+      	{
+         System.err.println( "Error creating file." );
+        // System.exit( 1 );
+      	} // end catch*/
+      	catch ( FormatterClosedException formatterClosedException )
+        {
+            System.err.println( "Error writing to file." );
+            return;
+        }
+          } 
+          
+          
+         }
+         
+    static String now() {
+    Calendar cal = Calendar.getInstance();
+    SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+    return sdf.format(cal.getTime()); 
+    }     
+    
+    public static int bintodec(char bin[])
+		{
+			int i;
+			int sum = 0;
+			//System.out.printf("\n %c %c %d\n",bin[0],bin[1],bin.length);
+			for(i=0;i<bin.length;i++)
+			{
+				sum = sum +(power(2,i)*Integer.parseInt(String.valueOf(bin[i])));
+			}
+			return sum;
+		}
+		public static int power(int a,int b)
+		{
+			int multi,i;
+			multi = 1;
+			for(i=0;i<b;i++)
+			{
+				multi = multi*a;
+			}
+			return multi;
+		}
+		
+		public static String dectobin(int dec, int padd_bits)
+		{
+			int b[] = new int[padd_bits];
+			int i;
+			String bin = ""; 
+			for(i=0;i<padd_bits;i++)
+			{
+				b[i] = dec%2;
+				dec = dec/2;
+				bin = bin.concat(String.valueOf(b[i]));
+				
+			}
+			String bout = "";
+			for(i=padd_bits-1;i>=0;i--)
+			bout = bout.concat(String.valueOf(bin.charAt(i)));
+			return bout;
+		}
+		
+		public static char[] infixtopostfix(String exp)
+		{
+			
+			
+			StackArray stack = new StackArray();
+			
+			int pri;
+			int length;
+			int j = 0;
+			char x;
+			char expression[] = new char[100];
+			//System.out.println("Please enter the input expression");
+			//exp = input.nextLine();
+			
+			length = exp.length();
+			
+			for(int i =0 ; i <= length ; i++)
+			{
+				if(i == length)
+				{
+					while(stack.peek() != '#')
+					{
+						if(stack.peek() == '(')
+							x = stack.pop();
+						else
+						expression[j++] = stack.pop();
+					}
+				}
+				else
+				if(exp.charAt(i) == '(')
+				{
+					stack.push(exp.charAt(i));
+				}
+				else
+				if(exp.charAt(i) == '.'|| exp.charAt(i) == '+'|| exp.charAt(i) == '~'|| exp.charAt(i) == '^')
+				{
+					if(stack.peek() != '(' && stack.peek() != '#')
+						expression[j++] = stack.pop();
+					else
+						stack.push(exp.charAt(i));
+				}
+				else
+				if(exp.charAt(i) == ')')
+				{
+					while(stack.peek() != '(')
+						expression[j++] = stack.pop();
+				}
+				else			
+				{
+					expression[j++] = exp.charAt(i);
+				}
+			}
+			//for(int i =0; i < length; i++)
+			//System.out.printf("%c",expression[i]);
+			
+			return expression;
+		}
+		public static char EvaluatePf(String exp)
+		{
+			String exp2="";
+			for(int a=0; Character.isLetterOrDigit(exp.charAt(a)) || exp.charAt(a) == '+'|| exp.charAt(a) == '^'|| exp.charAt(a) == '~'|| exp.charAt(a) == '.';a++)
+			{
+				exp2=exp2.concat(String.valueOf(exp.charAt(a)));
+			}
+				
+			StackArray stack = new StackArray();
+			int length = exp2.length();
+			//System.out.printf("\n%s exp and length  %d\n",exp2,length);
+			char a , b;
+			int answer = 0;
+			String temp;
+			char temp1;
+			for(int i = 0; i < length; i++)
+			{
+				if(exp2.charAt(i) != '.' && exp2.charAt(i) != '+' && exp2.charAt(i) != '~' && exp2.charAt(i) != '^')
+				{
+					stack.push(exp2.charAt(i));
+				}
+				else
+				if(exp2.charAt(i) == '.')
+				{
+					a = stack.pop();
+					b = stack.pop();
+					answer = Integer.parseInt(String.valueOf(a)) * Integer.parseInt(String.valueOf(b));
+					temp = String.valueOf(answer);
+					temp1 = temp.charAt(0);
+					stack.push(temp1);
+				}
+				else
+				if(exp2.charAt(i) == '^')
+				{
+					a = stack.pop();
+					b = stack.pop();
+					answer = Integer.parseInt(String.valueOf(a)) ^ Integer.parseInt(String.valueOf(b));
+					temp = String.valueOf(answer);
+					temp1 = temp.charAt(0);
+					stack.push(temp1);
+				}
+				else
+				if(exp2.charAt(i) == '+')
+				{
+					a = stack.pop();
+					b = stack.pop();
+					answer = Integer.parseInt(String.valueOf(a)) + Integer.parseInt(String.valueOf(b));
+					if(answer > 0)
+						answer = 1;
+					temp = String.valueOf(answer);
+					temp1 = temp.charAt(0);
+					stack.push(temp1);
+				}
+				else				
+				if(exp2.charAt(i) == '~')
+				{
+					a = stack.pop();
+					if(a == '1')
+						temp1 = '0';
+					else
+						temp1 = '1';
+					stack.push(temp1);
+				}
+				
+			}
+			temp1 = stack.pop();
+			
+			
+			return temp1;
+		}
+       
+}
